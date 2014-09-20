@@ -51,12 +51,10 @@ class ServoProperty(object):
         return max(self.min, min(value, self.max))
 
     def to_byte(self, value):
-        print value, self.min, self.conversion, round((value - self.min) * self.conversion)
-        return self.out_min + int(round((value - self.min) * self.conversion))
+        return self.out_min + int((value - self.min) * self.conversion)
 
 _positive = ServoProperty(None, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
 assert _positive.to_byte(0.) == SERVO_MIN_VALUE
-print _positive.to_byte(0.5), SERVO_MIN_VALUE, SERVO_MAX_VALUE
 assert _positive.to_byte(0.5) == (SERVO_MIN_VALUE + SERVO_MAX_VALUE) / 2
 assert _positive.to_byte(1.) == SERVO_MAX_VALUE
 _around_zero = ServoProperty(None, SERVO_MIN_VALUE, SERVO_MAX_VALUE, in_min=-1.)
