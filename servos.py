@@ -15,6 +15,7 @@ class Protocol(object):
         assert 0 <= port <= MAX_VALID_PORT
         assert 0 <= value <= 255
         self.serial.write(HEADER + chr(FIRST_PORT_ORD + port) + chr(value))
+        logger.debug('sent %d to %d' % (value, port))
         self.log_response()
 
     def log_response(self):
