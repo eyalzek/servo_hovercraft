@@ -7,8 +7,8 @@
 #include <Servo.h> 
 
 const int ERROR = -1;
-const char PACKET_SEPARATOR0 = '\xFF';
-const char PACKET_SEPARATOR1 = '\x00';
+const char PACKET_SEPARATOR0 = 'A';
+const char PACKET_SEPARATOR1 = 'B';
 
 #define SERVO_COUNT 5
 
@@ -75,7 +75,7 @@ void read_start_marker() {
 }
 
 int read_port() {
-  int port = read_byte();
+  int port = read_byte() - '0';
   // +1 for LED
   if (port > 0 && port < SERVO_COUNT + 1) {
     return port;
