@@ -2,7 +2,12 @@ import serial
 import logging
 logger = logging.getLogger(__name__)
 
+SERVO_MIN_VALUE = 0
 SERVO_MAX_VALUE = 127
+MOTOR_MIN_VALUE = int(127*0.15)
+MOTOR_MAX_VALUE = int(127*0.30)
+LED_MIN_VALUE = 0
+LED_MAX_VALUE = 1
 MAX_VALID_PORT = 5
 FIRST_PORT_ORD = ord('0')
 HEADER = 'AB'
@@ -23,12 +28,14 @@ class Protocol(object):
             logger.debug(self.serial.read(self.serial.inWaiting()))
 
 class ServoProperty(object):
-    def __init__(self, port, min=0.0, max=1.0, default=0.0):
+    def __init__(self, port, out_min, out_max, in_min=0.0, in_max=1.0, default=0.0):
         self.port = port
-        self.min = min
-        self.max = max
+        self.out_min = out_min
+        self.out_max = out_max
+        self.min = in_min
+        self.max = in_max
         self.value = default
-        self.conversion = SERVO_MAX_VALUE / (max - min)
+        self.conversion = (out_max - out_min) / (in_max - in_min)
 
     def __get__(self, obj, objtype=None):
         if obj is None:
@@ -44,31 +51,37 @@ class ServoProperty(object):
         return max(self.min, min(value, self.max))
 
     def to_byte(self, value):
-        return int((value - self.min) * self.conversion)
+        print value, self.min, self.conversion, round((value - self.min) * self.conversion)
+        return self.out_min + int(round((value - self.min) * self.conversion))
 
-_positive = ServoProperty(None)
-assert _positive.to_byte(0.) == 0
-assert _positive.to_byte(0.5) == SERVO_MAX_VALUE / 2
+_positive = ServoProperty(None, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
+assert _positive.to_byte(0.) == SERVO_MIN_VALUE
+print _positive.to_byte(0.5), SERVO_MIN_VALUE, SERVO_MAX_VALUE
+assert _positive.to_byte(0.5) == (SERVO_MIN_VALUE + SERVO_MAX_VALUE) / 2
 assert _positive.to_byte(1.) == SERVO_MAX_VALUE
-_around_zero = ServoProperty(None, min=-1.)
-assert _around_zero.to_byte(-1.) == 0
-assert _around_zero.to_byte(0.) == SERVO_MAX_VALUE / 2
+_around_zero = ServoProperty(None, SERVO_MIN_VALUE, SERVO_MAX_VALUE, in_min=-1.)
+assert _around_zero.to_byte(-1.) == SERVO_MIN_VALUE
+assert _around_zero.to_byte(0.) == (SERVO_MIN_VALUE + SERVO_MAX_VALUE) / 2
 assert _around_zero.to_byte(1.) == SERVO_MAX_VALUE
 assert _positive.clamp(0.1) == 0.1
 assert _positive.clamp(-0.1) == 0.0
 assert _positive.clamp(1.1) == 1.0
 assert _around_zero.clamp(-0.1) == -0.1
+_motor = ServoProperty(None, MOTOR_MIN_VALUE, MOTOR_MAX_VALUE)
+assert _motor.to_byte(0.) == MOTOR_MIN_VALUE
+assert _motor.to_byte(0.5) == (MOTOR_MIN_VALUE + MOTOR_MAX_VALUE) / 2
+assert _motor.to_byte(1.) == MOTOR_MAX_VALUE
 
 class Servos(object):
     def __init__(self, serial):
         self.protocol = Protocol(serial)
 
-    thrust = ServoProperty(0)
-    duct = ServoProperty(1)
-    turn = ServoProperty(2, min=-1.)
-    x = ServoProperty(3)
-    y = ServoProperty(4)
-    led = ServoProperty(5)
+    thrust = ServoProperty(0, MOTOR_MIN_VALUE, MOTOR_MAX_VALUE)
+    duct = ServoProperty(1, MOTOR_MIN_VALUE, MOTOR_MAX_VALUE)
+    turn = ServoProperty(2, SERVO_MIN_VALUE, SERVO_MAX_VALUE, in_min=-1.)
+    x = ServoProperty(3, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
+    y = ServoProperty(4, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
+    led = ServoProperty(5, LED_MIN_VALUE, LED_MAX_VALUE)
 
 class FakeSerial(object):
     def write(self, data):
@@ -91,3 +104,7 @@ if __name__ == '__main__':
     print 'thrust:', servos.thrust
     servos.turn = 0.1
     servos.turn = -1.0
+    servos.led = 0.0
+    servos.led = 0.4
+    servos.led = 0.6
+    servos.led = 1.0
