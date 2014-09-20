@@ -11,7 +11,7 @@ class Wiimote(object):
     def __init__(self, servos):
         super(Wiimote, self).__init__()
         self.servos = servos
-        self.motion = None
+        # self.motion = None
         self.button_delay = 0.1
         self.servo_step = 0.1
 
@@ -25,8 +25,8 @@ class Wiimote(object):
                 print("Error connecting to the wiimote, press 1 and 2")
             else:
                 print("Wiimote now connected")
-                wii.enable(cwiid.FLAG_MOTIONPLUS)
-                wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_NUNCHUK | cwiid.RPT_MOTIONPLUS
+                # wii.enable(cwiid.FLAG_MOTIONPLUS)
+                wii.rpt_mode = cwiid.RPT_BTN | cwiid.RPT_NUNCHUK# | cwiid.RPT_MOTIONPLUS
                 wii.led = 6
                 return wii
 
@@ -61,12 +61,12 @@ class Wiimote(object):
 
                 if (turn / 10 > 13):
                     print("turn right")
-                    s.turn += step * 2
+                    s.turn += (step * 2)
                     time.sleep(button_delay)
 
                 if (turn / 10 < 13):
                     print("turn left")
-                    s.turn -= step * 2
+                    s.turn -= (step * 2)
                     time.sleep(button_delay)
 
             if (buttons & cwiid.BTN_UP):
@@ -89,18 +89,6 @@ class Wiimote(object):
                 s.x += step
                 time.sleep(button_delay)
 
-            # if (buttons & cwiid.BTN_1):
-            #     print 'Button 1 pressed'
-            #     time.sleep(button_delay)
-
-            # if (buttons & cwiid.BTN_2):
-            #     print 'Button 2 pressed'
-            #     time.sleep(button_delay)
-
-            # if (buttons & cwiid.BTN_A):
-            #     print 'Button A pressed'
-            #     time.sleep(button_delay)
-
             if (buttons & cwiid.BTN_B):
                 print("toggle led")
                 s.led = 1.0 - s.led
@@ -116,10 +104,10 @@ class Wiimote(object):
                 s.duct += step
                 time.sleep(button_delay)
 
-            if "motionplus" in wii.state and s.led >= 0.5:
-                if self.motion != wii.state["motionplus"]:
-                    print(wii.state["motionplus"])
-                    self.motion = wii.state["motionplus"]
+            # if "motionplus" in wii.state and s.led >= 0.5:
+            #     if self.motion != wii.state["motionplus"]:
+            #         print(wii.state["motionplus"])
+            #         self.motion = wii.state["motionplus"]
 
             # print wii.state
             # time.sleep(1)
@@ -127,8 +115,10 @@ class Wiimote(object):
 def main():
     try:
         s = servos.Servos(serial.Serial('/dev/ttyACM0', 9600))
+        print("mounted ttyACM0")
     except SerialException:
         s = servos.Servos(serial.Serial('/dev/ttyACM1', 9600))
+        print("mounted ttyACM1")
 
     wii = Wiimote(s)
     wii.run()
