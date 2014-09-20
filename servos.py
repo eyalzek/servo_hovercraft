@@ -4,8 +4,10 @@ logger = logging.getLogger(__name__)
 
 SERVO_MIN_VALUE = 0
 SERVO_MAX_VALUE = 127
-MOTOR_MIN_VALUE = int(127*0.15)
-MOTOR_MAX_VALUE = int(127*0.30)
+DUCT_MIN_VALUE = int(127*0.30)
+DUCT_MAX_VALUE = int(127*0.50)
+THRUST_MIN_VALUE = int(127*0.40)
+THRUST_MAX_VALUE = int(127*0.60)
 LED_MIN_VALUE = 0
 LED_MAX_VALUE = 1
 MAX_VALID_PORT = 5
@@ -65,17 +67,17 @@ assert _positive.clamp(0.1) == 0.1
 assert _positive.clamp(-0.1) == 0.0
 assert _positive.clamp(1.1) == 1.0
 assert _around_zero.clamp(-0.1) == -0.1
-_motor = ServoProperty(None, MOTOR_MIN_VALUE, MOTOR_MAX_VALUE)
-assert _motor.to_byte(0.) == MOTOR_MIN_VALUE
-assert _motor.to_byte(0.5) == (MOTOR_MIN_VALUE + MOTOR_MAX_VALUE) / 2
-assert _motor.to_byte(1.) == MOTOR_MAX_VALUE
+_motor = ServoProperty(None, DUCT_MIN_VALUE, DUCT_MAX_VALUE)
+assert _motor.to_byte(0.) == DUCT_MIN_VALUE
+assert _motor.to_byte(0.5) == (DUCT_MIN_VALUE + DUCT_MAX_VALUE) / 2
+assert _motor.to_byte(1.) == DUCT_MAX_VALUE
 
 class Servos(object):
     def __init__(self, serial):
         self.protocol = Protocol(serial)
 
-    thrust = ServoProperty(0, MOTOR_MIN_VALUE, MOTOR_MAX_VALUE)
-    duct = ServoProperty(1, MOTOR_MIN_VALUE, MOTOR_MAX_VALUE)
+    thrust = ServoProperty(0, THRUST_MIN_VALUE, THRUST_MAX_VALUE)
+    duct = ServoProperty(1, DUCT_MIN_VALUE, DUCT_MAX_VALUE)
     turn = ServoProperty(2, SERVO_MIN_VALUE, SERVO_MAX_VALUE, in_min=-1.)
     x = ServoProperty(3, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
     y = ServoProperty(4, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
