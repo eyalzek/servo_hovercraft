@@ -35,7 +35,7 @@ class Wiimote(object):
         button_delay = self.button_delay
         step = self.servo_step
         wii = self.pair()
-        time.sleep(1) # give the buttons a change to get set
+        time.sleep(1) # give the buttons a chance to get set
         while True:
             buttons = wii.state["buttons"]
             # disconnect on home button
@@ -47,6 +47,7 @@ class Wiimote(object):
                 wii.rumble = 0
                 exit(wii)
 
+            # thrust + turn
             if "nunchuk" in wii.state:
                 turn = wii.state["nunchuk"]["stick"][0]
                 thrust = wii.state["nunchuk"]["stick"][1]
@@ -70,6 +71,18 @@ class Wiimote(object):
                     s.turn -= step
                     time.sleep(button_delay)
 
+            # duct fan
+            if (buttons & cwiid.BTN_MINUS):
+                print("duct slower")
+                s.duct -= step
+                time.sleep(button_delay)
+
+            if (buttons & cwiid.BTN_PLUS):
+                print("duct faster")
+                s.duct += step
+                time.sleep(button_delay)
+
+            # camera x/y
             if (buttons & cwiid.BTN_UP):
                 print("y up")
                 s.y += step
@@ -90,19 +103,10 @@ class Wiimote(object):
                 s.x += step
                 time.sleep(button_delay)
 
+            # led test
             if (buttons & cwiid.BTN_B):
                 print("toggle led")
                 s.led = 1.0 - s.led
-                time.sleep(button_delay)
-
-            if (buttons & cwiid.BTN_MINUS):
-                print("duct slower")
-                s.duct -= step
-                time.sleep(button_delay)
-
-            if (buttons & cwiid.BTN_PLUS):
-                print("duct faster")
-                s.duct += step
                 time.sleep(button_delay)
 
             # if "motionplus" in wii.state and s.led >= 0.5:
@@ -115,10 +119,10 @@ class Wiimote(object):
 
 def main():
     try:
-        s = servos.Servos(serial.Serial('/dev/ttyACM0', 9600))
+        s = servos.Servos(serial.Serial("/dev/ttyACM0", 9600))
         print("mounted ttyACM0")
     except SerialException:
-        s = servos.Servos(serial.Serial('/dev/ttyACM1', 9600))
+        s = servos.Servos(serial.Serial("/dev/ttyACM1", 9600))
         print("mounted ttyACM1")
 
     wii = Wiimote(s)
