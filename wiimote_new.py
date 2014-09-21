@@ -12,8 +12,8 @@ class Wiimote(object):
         super(Wiimote, self).__init__()
         self.servos = servos
         # self.motion = None
-        self.button_delay = 0.1
-        self.servo_step = 0.1
+        self.button_delay = 0.05
+        self.servo_step = 0.05
 
     def pair(self):
         print("press 1 and 2 buttons")
@@ -35,12 +35,13 @@ class Wiimote(object):
         button_delay = self.button_delay
         step = self.servo_step
         wii = self.pair()
-        time.sleep(1) # let the buttons get set
+        time.sleep(1) # give the buttons a change to get set
         while True:
             buttons = wii.state["buttons"]
             # disconnect on home button
             if (buttons - cwiid.BTN_HOME == 0):
                 print("closing")
+                s.reset()
                 wii.rumble = 1
                 time.sleep(1)
                 wii.rumble = 0
@@ -61,12 +62,12 @@ class Wiimote(object):
 
                 if (turn / 10 > 13):
                     print("turn right")
-                    s.turn += (step * 2)
+                    s.turn += step
                     time.sleep(button_delay)
 
                 if (turn / 10 < 13):
                     print("turn left")
-                    s.turn -= (step * 2)
+                    s.turn -= step
                     time.sleep(button_delay)
 
             if (buttons & cwiid.BTN_UP):

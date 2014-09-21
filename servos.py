@@ -5,9 +5,9 @@ logger = logging.getLogger(__name__)
 SERVO_MIN_VALUE = 0
 SERVO_MAX_VALUE = 127
 DUCT_MIN_VALUE = int(127*0.30)
-DUCT_MAX_VALUE = int(127*0.50)
+DUCT_MAX_VALUE = int(127*0.85)
 THRUST_MIN_VALUE = int(127*0.40)
-THRUST_MAX_VALUE = int(127*0.60)
+THRUST_MAX_VALUE = int(127*0.85)
 LED_MIN_VALUE = 0
 LED_MAX_VALUE = 1
 MAX_VALID_PORT = 5
@@ -82,6 +82,11 @@ class Servos(object):
     x = ServoProperty(3, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
     y = ServoProperty(4, SERVO_MIN_VALUE, SERVO_MAX_VALUE)
     led = ServoProperty(5, LED_MIN_VALUE, LED_MAX_VALUE)
+
+    def reset(self):
+        for k, v in self.__dict__.items():
+            if isinstance(v, ServoProperty):
+                setattr(self, k, v.default)
 
 class FakeSerial(object):
     def write(self, data):
